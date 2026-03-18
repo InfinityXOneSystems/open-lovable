@@ -1,0 +1,43 @@
+﻿name: verify
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint if available
+        run: |
+          if pnpm run | grep -q " lint"; then
+            pnpm run lint
+          else
+            echo "No lint script"
+          fi
+
+      - name: Build if available
+        run: |
+          if pnpm run | grep -q " build"; then
+            pnpm run build
+          else
+            echo "No build script"
+          fi
